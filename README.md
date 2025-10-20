@@ -1,6 +1,6 @@
-# Claude Code 国内使用指南 | 最新Claude Pro订阅教程 | Clauddy | 国内如何注册Claude帐号？| Claude镜像安全吗？| 如何订阅Claude Pro会员？
+# Claude Code | Codex 国内使用指南 | 最新Claude Pro订阅教程 | Clauddy | 国内如何注册Claude帐号？| Claude镜像安全吗？| 如何订阅Claude Pro会员？
 
-*2025年9月7日更新*
+*2025年10月19日更新*
 
 <p align="center">
   <img src="https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/6826a6227b1fbd47034d1936_claude-code.webp" alt="Claude Code Banner | Claude镜像替代方案 | Claude中转服务" width="600">
@@ -11,6 +11,8 @@
 ## 📖 什么是 Claude Code？
 
 Claude Code 是 Anthropic 公司推出的官方 AI 编程助手，基于最新的 **Claude Opus 4.1** 模型。它不仅仅是一个代码生成工具，更是一个能够理解项目架构、进行深度推理、执行复杂任务的智能编程伙伴。
+
+> 新消息：通过 Clauddy 的共享额度，你现在可以在同一个套餐里同时使用 **Claude Code** 与 **Codex（OpenAI 最新的 GPT-5 编程助手）**。一次购买，获得两位顶尖 AI 结对编程伙伴。
 
 ### 🎯 核心特性
 
@@ -26,13 +28,27 @@ Claude Code 是 Anthropic 公司推出的官方 AI 编程助手，基于最新�
 
 | 特性 | Claude Code | ChatGPT | GitHub Copilot | Claude镜像站|
 |------|------------|---------|----------------|--------|
-| **模型版本** | Opus 4.1 (最新) | GPT-5 | Codex | 未知/降级模型 |
-| **代码质量** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| **架构理解** | 深度理解 | 基础理解 | 局部理解 | 几乎无 |
+| **模型版本** | Sonnet 4.5 (最新) | GPT-5 | Codex | 未知/降级模型 |
+| **代码质量** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+| **架构理解** | 深度理解 | 高级推理 | 局部理解 | 几乎无 |
 | **调试能力** | 专业级 | 良好 | 基础 | 差 |
 | **响应速度** | 快 | 快 | 快 | 封号/不稳定 |
 | **价格透明度** | 完全透明 | 透明 | 透明 | 不透明 |
 | **数据安全** | 官方保障 | 官方保障 | 官方保障 | 无保障 |
+
+## 🤖 Codex 是什么？为什么要搭配 Claude Code？
+
+Codex 是 OpenAI 最新的 GPT-5 级别代码模型，专注于快速生成代码片段、命令行脚本和单文件实验。它具备以下优势：
+
+- **极速响应**：秒级生成代码草案与自动补全
+- **广泛生态**：深度整合 GitHub 与常见编程框架
+- **多语言支持**：对低层语言、脚本语言同样友好
+
+而 Claude Code 擅长横跨项目、理解复杂上下文和推理设计。通过 Clauddy 的共享额度，你可以随时在两个模型之间切换：
+
+- 用 Codex 快速生成草稿、命令或测试样例
+- 用 Claude Code 深入理解项目、执行重构与架构设计
+- 两款顶级模型共享同一套餐额度，无额外费用
 
 ## 💡 核心优势
 
@@ -136,6 +152,7 @@ claude
 
 #### 为什么选择 Clauddy Claude拼车会员？
 
+- ✅ **一份套餐 = 两个顶级模型**：共享额度下同时调用 Claude Code 与 Codex，真正的「买一得二」
 - ✅ **官方 API 直连**：确保使用原版 Claude Opus 4.1，非Claude镜像
 - ✅ **透明计费**：按实际使用量计费，无Claude中转隐藏费用
 - ✅ **稳定可靠**：99.9% 在线率，避免Claude封号问题
@@ -235,8 +252,8 @@ Claude Code 都将成为你最强大的伙伴。
 ### 立即开始
 
 1. **获取 API Key**：访问 [clauddy.com](https://clauddy.com) 获取稳定的Claude拼车会员服务
-2. **安装 Claude Code**：`npm install -g @anthropic-ai/claude-code`（非Claude镜像版本）
-3. **开始编程**：享受官方Claude Code拼车带来的AI助力高效开发体验
+2. **安装 Claude Code 与 Codex CLI**：`npm install -g @anthropic-ai/claude-code`，并使用 Clauddy 提供的共享额度调用 Codex
+3. **开始编程**：一键切换 Claude Code 深度推理与 Codex 极速生成，体验双引擎 AI 助力开发
 
 ---
 
@@ -247,6 +264,6 @@ Claude Code 都将成为你最强大的伙伴。
 </p>
 
 <p align="center">
-  <sub>本Claude Code拼车指南持续更新中 • 最后更新：2025年9月</sub><br>
+  <sub>本Claude Code拼车指南持续更新中 • 最后更新：2025年10月</sub><br>
   <sub>关键词：Claude镜像 Claude中转 Claude拼车 Claude会员 Claude Code拼车 Claude封号</sub>
 </p>
