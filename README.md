@@ -1,6 +1,6 @@
 # Claude Code | Codex 国内使用指南 | 最新Claude Pro订阅教程 | Clauddy | 国内如何注册Claude帐号？| Claude镜像安全吗？| 如何订阅Claude Pro会员？
 
-*2025年10月19日更新*
+*2025年11月15日更新*
 
 <p align="center">
   <img src="https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/6826a6227b1fbd47034d1936_claude-code.webp" alt="Claude Code Banner | Claude镜像替代方案 | Claude中转服务" width="600">
@@ -264,6 +264,6 @@ Claude Code 都将成为你最强大的伙伴。
 </p>
 
 <p align="center">
-  <sub>本Claude Code拼车指南持续更新中 • 最后更新：2025年10月</sub><br>
+  <sub>本Claude Code拼车指南持续更新中 • 最后更新：2025年11月</sub><br>
   <sub>关键词：Claude镜像 Claude中转 Claude拼车 Claude会员 Claude Code拼车 Claude封号</sub>
 </p>
