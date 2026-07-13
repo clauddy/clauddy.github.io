@@ -1,269 +1,212 @@
-# Claude Code | Codex 国内使用指南 | 最新Claude Pro订阅教程 | Clauddy | 国内如何注册Claude帐号？| Claude镜像安全吗？| 如何订阅Claude Pro会员？
+# 2026 Claude Code 与 Codex 国内使用指南｜Clauddy 一键配置、模型更新与安全说明
 
-*2025年11月15日更新*
+*最后核对：2026 年 7 月 13 日*
 
 <p align="center">
-  <img src="https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/6826a6227b1fbd47034d1936_claude-code.webp" alt="Claude Code Banner | Claude镜像替代方案 | Claude中转服务" width="600">
+  <img src="https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/6826a6227b1fbd47034d1936_claude-code.webp" alt="Claude Code、Codex 与 Clauddy 配置指南" width="600">
 </p>
 
----
+<p align="center">
+  <a href="https://clauddy.com">Clauddy 控制台</a> ·
+  <a href="https://github.com/clauddy/clauddy.github.io/blob/main/install.sh">在 GitHub 审阅 install.sh 源码</a> ·
+  <a href="https://code.claude.com/docs/en/overview">Claude Code 官方文档</a> ·
+  <a href="https://developers.openai.com/codex">Codex 官方文档</a>
+</p>
 
-## 📖 什么是 Claude Code？
+> 本页依据 Anthropic 与 OpenAI 官方文档更新。模型、套餐、地区可用性和 Clauddy 分组倍率都可能变化，请以官方文档与 Clauddy 控制台实时显示为准。
 
-Claude Code 是 Anthropic 公司推出的官方 AI 编程助手，基于最新的 **Claude Opus 4.1** 模型。它不仅仅是一个代码生成工具，更是一个能够理解项目架构、进行深度推理、执行复杂任务的智能编程伙伴。
+## 2026 年 7 月重要更新
 
-> 新消息：通过 Clauddy 的共享额度，你现在可以在同一个套餐里同时使用 **Claude Code** 与 **Codex（OpenAI 最新的 GPT-5 编程助手）**。一次购买，获得两位顶尖 AI 结对编程伙伴。
+| 项目 | 当前信息 |
+| --- | --- |
+| Claude 模型 | Anthropic 当前列出 Claude Fable 5、Claude Opus 4.8、Claude Sonnet 5 与 Claude Haiku 4.5。复杂的 agentic coding 工作推荐从 Opus 4.8 开始；Fable 5 是能力最高的广泛发布型号。 |
+| 上下文窗口 | Fable 5、Opus 4.8、Sonnet 5 为 1M tokens；Haiku 4.5 为 200K tokens。实际可用长度仍取决于模型、客户端和服务商。 |
+| Opus 4.1 | 已被 Anthropic 标记为 deprecated，计划于 2026 年 8 月 5 日退役，不应再写成“最新模型”。 |
+| Codex / GPT | OpenAI 当前推荐 GPT-5.6 系列；Codex 是可在 CLI、IDE、桌面与云端使用的完整 coding agent，不只是代码补全或单文件生成器。 |
+| 安装方式 | Claude Code 与 Codex CLI 都提供官方独立安装器；新用户不必再把 Node.js + npm 当作首选安装路径。 |
 
-### 🎯 核心特性
+## Claude Code 与 Codex 分别是什么？
 
-- **🧠 深度理解能力**：200k/1m tokens 上下文窗口，能够理解整个项目结构
-- **💻 原生编程优化**：专为编程、研究、文案任务优化，代码质量远超通用模型
-- **🔄 多轮对话记忆**：保持长期对话上下文，无需重复解释需求
-- **🎨 多模态支持**：可以理解图片、生成图表、处理截图
-- **⚡ 实时执行**：支持代码实时运行和调试
+### Claude Code
 
-## 🚀 为什么选择 Claude Code？
+Claude Code 是 Anthropic 的 agentic coding 工具。它可以读取项目、修改文件、运行命令、调试、审查代码，并在终端、IDE、桌面应用和 Web 场景中工作。它并不固定“基于某一个模型”；默认模型和可选模型会随账号、套餐、客户端版本及 API 服务商变化。
 
-### 对比其他 AI 编程工具（Claude镜像 vs Claude拼车）
+### Codex
 
-| 特性 | Claude Code | ChatGPT | GitHub Copilot | Claude镜像站|
-|------|------------|---------|----------------|--------|
-| **模型版本** | Sonnet 4.5 (最新) | GPT-5 | Codex | 未知/降级模型 |
-| **代码质量** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| **架构理解** | 深度理解 | 高级推理 | 局部理解 | 几乎无 |
-| **调试能力** | 专业级 | 良好 | 基础 | 差 |
-| **响应速度** | 快 | 快 | 快 | 封号/不稳定 |
-| **价格透明度** | 完全透明 | 透明 | 透明 | 不透明 |
-| **数据安全** | 官方保障 | 官方保障 | 官方保障 | 无保障 |
+Codex 是 OpenAI 的 coding agent。Codex CLI 在本机项目中运行，也可通过 IDE、桌面应用和 Codex Web 使用。它适合跨文件实现功能、定位问题、执行测试、代码审查和较长时间的工程任务。
 
-## 🤖 Codex 是什么？为什么要搭配 Claude Code？
+### 怎么选择？
 
-Codex 是 OpenAI 最新的 GPT-5 级别代码模型，专注于快速生成代码片段、命令行脚本和单文件实验。它具备以下优势：
+| 需求 | 建议 |
+| --- | --- |
+| 更偏 Claude 模型、长上下文与复杂代码库工作 | 从 Claude Code 开始 |
+| 更偏 GPT 模型、OpenAI 工具链与本地/云端协作 | 从 Codex 开始 |
+| 想按任务切换模型或客户端 | 使用独立令牌，或选择 Clauddy Unified 分组 |
+| 涉及商业机密或敏感代码 | 优先使用组织批准的官方或自托管方案，并先确认数据政策 |
 
-- **极速响应**：秒级生成代码草案与自动补全
-- **广泛生态**：深度整合 GitHub 与常见编程框架
-- **多语言支持**：对低层语言、脚本语言同样友好
+两者都是持续更新的工程代理，适合用实际项目、相同任务和相同验收标准做测试，而不是依赖固定星级或笼统的“谁更强”结论。
 
-而 Claude Code 擅长横跨项目、理解复杂上下文和推理设计。通过 Clauddy 的共享额度，你可以随时在两个模型之间切换：
+## 快速开始
 
-- 用 Codex 快速生成草稿、命令或测试样例
-- 用 Claude Code 深入理解项目、执行重构与架构设计
-- 两款顶级模型共享同一套餐额度，无额外费用
+### 1. 安装官方客户端
 
-## 💡 核心优势
+Claude Code（macOS、Linux、WSL）：
 
-### 1. 🧠 **超强的推理能力**
+~~~bash
+curl -fsSL https://claude.ai/install.sh | bash
+claude --version
+claude doctor
+~~~
 
-Claude Code 基于 Opus 4.1 模型，拥有业界领先的推理能力：
+Codex CLI（macOS、Linux）：
 
-- **复杂问题解决**：能够处理多步骤、需要深度思考的编程问题
-- **算法优化**：不仅实现功能，还能优化时间和空间复杂度
-- **架构设计**：从零开始设计完整的系统架构
+~~~bash
+curl -fsSL https://chatgpt.com/codex/install.sh | sh
+codex --version
+~~~
 
-### 2. 📚 **海量的上下文理解**
+然后进入项目目录并启动对应客户端：
 
-200k / 1m(sonnet4) tokens 的上下文窗口意味着：
-
-- 可以一次性理解整个中型项目的代码
-- 记住之前的所有对话和修改
-- 跨文件理解代码关系和依赖
-
-### 3. 🎨 **优雅的代码风格**
-
-Claude Code 生成的代码特点：
-
-- 遵循最佳实践和设计模式
-- 代码可读性极高
-- 自动添加合理的注释
-- 考虑边界情况和错误处理
-
-### 4. 🔒 **安全可靠**
-
-- **官方模型保证**：使用原版 Claude Opus 4.1，无降级风险
-- **数据隐私保护**：对话内容加密传输，不会被第三方获取
-- **稳定可靠**：官方服务器支持，99.9% 在线率
-
-## 🚫 为什么要避免使用Claude镜像站？
-
-### ⚠️ Claude镜像站的常见问题（导致Claude封号）
-
-1. **🔄 模型替换风险**
-   - 表面宣称使用 Claude，实际可能是廉价模型
-   - 代码质量严重下降，bug 频出
-   - 无法处理复杂编程任务
-
-2. **💰 隐性成本陷阱**
-   - Token 计算不透明，实际消耗远超预期
-   - 隐藏额外收费项目，连切换模型都要收费
-   - 价格看似便宜，实际成本更高
-
-3. **📊 性能严重缩水（Claude封号风险）**
-   - 响应速度慢，经常超时，Claude封号不可用
-   - 上下文长度被严重限制
-   - 无法保持长对话记忆
-
-4. **🔓 数据安全隐患**
-   - 代码可能被存储和泄露
-   - 商业机密面临风险
-   - 无法追究责任
-
-5. **❌ 功能阉割**
-   - 不支持最新特性
-   - 无法使用高级功能
-   - 更新延迟或永不更新
-
-### ✅ 选择官方Claude Code拼车会员而非Claude镜像的理由
-
-- **原版模型**：保证使用最新的 Opus 4.1 模型，非Claude镜像降级版本
-- **透明计费**：每个 token 消耗清晰可见，无Claude中转隐藏费用
-- **官方支持**：遇到问题可获得官方技术支持，避免Claude封号
-- **持续更新**：第一时间获得新功能和改进，告别Claude镜像延迟
-
-## 🚀 快速开始
-
-### 安装 Claude Code
-
-```bash
-# 1. 安装 Node.js 18+ (如未安装)
-# 访问 https://nodejs.org 下载
-
-# 2. 安装 Claude Code CLI
-npm install -g @anthropic-ai/claude-code
-
-# 3. 从 clauddy.com 获取 API Key
-export ANTHROPIC_BASE_URL="通过clauddy.com获取的拼车服务地址"
-export ANTHROPIC_AUTH_TOKEN="你的API密钥"
-```
-
-### 启动 Claude Code
-
-```bash
+~~~bash
 cd your-project
 claude
-```
 
-## 🔑 获取 API Key（Claude拼车会员服务）
+# 或
+codex
+~~~
 
-要使用官方 Claude Code，避免Claude镜像封号风险，你需要一个可靠的 API Key。
+官方 Claude Code 当前要求 Pro、Max、Team、Enterprise 或 Console 账号，且受支持地区限制；Codex 可以使用符合条件的 ChatGPT 账号，也可以配置 API Key。具体资格以各自官方页面为准。
 
-### 推荐方式：Clauddy.com Claude拼车平台
+### 2. 使用 Clauddy 一键配置
 
-如果你在寻找稳定可靠的 API Key 服务，可以考虑 [Clauddy.com](https://clauddy.com)：
+仓库根目录的 <code>install.sh</code> 是双语交互式配置向导，当前版本为 <code>0.3.1</code>。默认 API base URL 为 <code>https://api.clauddy.com</code>；控制台与令牌管理仍使用 <code>https://clauddy.com</code>。运行前可以先在 [GitHub 查看并审阅完整脚本源码](https://github.com/clauddy/clauddy.github.io/blob/main/install.sh)，再下载执行：
 
-#### 为什么选择 Clauddy Claude拼车会员？
+~~~bash
+curl -fsSL https://docs.clauddy.com/install.sh \
+  -o /tmp/clauddy-install.sh
 
-- ✅ **一份套餐 = 两个顶级模型**：共享额度下同时调用 Claude Code 与 Codex，真正的「买一得二」
-- ✅ **官方 API 直连**：确保使用原版 Claude Opus 4.1，非Claude镜像
-- ✅ **透明计费**：按实际使用量计费，无Claude中转隐藏费用
-- ✅ **稳定可靠**：99.9% 在线率，避免Claude封号问题
-- ✅ **技术支持**：专业技术团队，快速响应，告别Claude镜像无服务
+less /tmp/clauddy-install.sh
+bash /tmp/clauddy-install.sh
+~~~
 
-#### 快速获取
+可信环境下也可以直接运行：
 
-1. 访问 [clauddy.com](https://clauddy.com)
-2. 注册账号
-3. 选择合适的套餐
-4. 获取 API Key
-5. 开始使用 Claude Code
+~~~bash
+curl -fsSL https://docs.clauddy.com/install.sh | bash
+~~~
 
+英文界面：
 
-## ❓ 常见问题 (FAQ)
+~~~bash
+bash /tmp/clauddy-install.sh --lang en
+~~~
 
-### Q1: Claude Code 支持哪些编程语言？
+该脚本会：
 
-**A:** Claude Code 支持几乎所有主流编程语言，包括但不限于：
-- **Web 开发**：JavaScript, TypeScript, HTML, CSS, React, Vue, Angular
-- **后端开发**：Python, Java, Go, Rust, Node.js, PHP, Ruby
-- **移动开发**：Swift, Kotlin, React Native, Flutter
-- **系统编程**：C, C++, Rust, Assembly
-- **数据科学**：Python, R, Julia, MATLAB
-- **其他**：SQL, Bash, PowerShell, Dockerfile, YAML, JSON
+- 检测 Claude Code、Codex CLI、Gemini CLI、OpenClaw 和 Hermes agent。
+- 根据客户端推荐专用令牌分组，也可使用一个 Unified 令牌。
+- 修改配置前创建带时间戳的备份。
+- 写入对应的 base URL 与 API token 配置。
+- 调用 <code>/v1/models</code> 验证令牌、可用模型数量和接口延迟。
+- 连续验证失败时，可选择执行一次有界的 AI 诊断；这会消耗少量额度，只返回建议，不自动执行修复。
 
-### Q2: Claude Code 的上下文窗口有多大？
+如需连接自托管或测试网关，可使用 <code>--base-url</code> 覆盖 API 地址；如 API 与控制台不在同一主机，可另外使用 <code>--console-url</code> 指定控制台地址。
 
-**A:** Claude Code 基于 Opus 4.1 模型，拥有 **200K tokens** 的上下文窗口，相当于：
-- 约 15 万个英文单词
-- 约 500 页的代码
-- 可以一次性理解整个中型项目
+## Clauddy 当前分组说明
 
-### Q3: Claude Code 能否理解图片和生成图表？
+以下倍率来自安装脚本中 2026 年 7 月 12 日同步的生产分组信息。控制台实时显示始终具有更高优先级。
 
-**A:** 是的！Claude Code 支持：
-- **图片理解**：UI 截图、架构图、流程图、错误截图
-- **图表生成**：使用 Mermaid、PlantUML 等生成各类图表
-- **视觉调试**：分析 UI 问题，提供修复建议
+| 分组 | 适用客户端 | 脚本记录倍率 |
+| --- | --- | ---: |
+| Claude | Claude Code 专用 | 1.4x |
+| OpenAI | Codex 专用 | 0.5x |
+| Gemini | Gemini CLI 专用 | 1.8x |
+| Claude3p | 不限制 Claude 客户端类型 | 1.8x |
+| ClaudeAPI | Claude 官方 Key 转发 | 5.0x |
+| Unified | Claude、Codex、Gemini 及常驻 agent | 1.8x |
 
-### Q4: 如何确保我使用的是官方 Claude Code？
+如果只配置一个客户端，专用分组通常更省；如果需要多个客户端共用一把 key，Unified 更方便。OpenClaw、Hermes 等常驻 agent 不应使用仅接受 Claude Code 客户端的 Claude 分组。
 
-**A:** 识别官方服务的方法：
-1. **模型标识**：返回明确的模型版本信息
-2. **性能表现**：响应速度快，质量稳定
-3. **计费透明**：token 使用量清晰可查
+## 脚本会修改哪些文件？
 
-### Q5: Claude Code 相比 GitHub Copilot 有什么优势？
+按你的选择，脚本可能修改：
 
-**A:** 主要优势包括：
-- **更强的理解能力**：可以理解整个项目，而不仅仅是当前文件
-- **更好的代码质量**：生成的代码更优雅、更安全
-- **交互式开发**：可以通过对话不断优化代码
-- **多功能性**：不仅写代码，还能设计架构、审查代码、编写文档
+| 客户端 | 配置位置 |
+| --- | --- |
+| Claude Code | <code>~/.claude/settings.json</code> |
+| Codex | <code>~/.codex/config.toml</code> 与 <code>~/.clauddy/env</code> |
+| Gemini CLI | <code>~/.gemini/.env</code> |
+| Shell 环境 | <code>~/.zshrc</code>、<code>~/.bashrc</code> 或 <code>~/.profile</code> |
 
-### Q6: 使用 Claude Code 需要科学上网吗？
+已有文件会先备份为 <code>.bak.&lt;时间戳&gt;</code>。令牌属于敏感凭据，不要提交到 Git、粘贴到 Issue、截图或发送给无关人员。
 
-**A:** 
-- **官方 API**：需要稳定的网络环境
-- **通过 Clauddy**：国内直连，无需额外配置
+## 手动配置 Claude Code
 
-### Q7: Claude Code拼车会员的费用如何？
+如果不使用向导，可以在当前终端临时设置：
 
-**A:** 
-- **按使用量计费**：根据 token 消耗计算，比Claude镜像透明
-- **灵活套餐** Claude Pro会员($20), Claude MAX 5x会员($100), Claude MAX 20x会员($200)
-- **性价比高**：相比雇佣高级工程师，成本极低
+~~~bash
+export ANTHROPIC_BASE_URL="https://api.clauddy.com"
+export ANTHROPIC_AUTH_TOKEN="你的 Clauddy 令牌"
 
-### Q8: 如何最大化 Claude Code 的效果？
+claude
+~~~
 
-**A:** 最佳实践：
-1. **提供充分上下文**：项目结构、技术栈、需求详情
-2. **明确具体需求**：避免模糊描述
-3. **迭代优化**：通过对话逐步完善
-4. **利用高级功能**：项目扫描、代码审查等
-5. **保持对话连贯**：在同一会话中完成相关任务
+临时环境变量只对当前 shell 生效。需要持久化时，优先使用客户端支持的配置文件，并确保文件权限和备份符合你的安全要求。
 
-### Q9: Claude Code 能否处理大型项目？
+## 如何判断网关是否适合自己？
 
-**A:** 绝对可以！Claude Code 专为大型项目设计：
-- 支持项目级别的理解和分析
-- 可以处理复杂的依赖关系
-- 理解微服务架构
-- 支持增量式开发
+Claude Code、Codex 等是官方客户端；Clauddy 是独立的第三方统一 AI API 网关，两者不是同一层产品。选择任何中转或网关服务前，建议检查：
 
-## 📢 结语
+1. 模型列表是否返回明确的模型 ID，是否与控制台说明一致。
+2. 计费单位、分组倍率、余额和用量记录是否可核对。
+3. 隐私政策、日志保留、数据处理区域和客服渠道是否满足要求。
+4. 是否支持令牌撤销、额度限制和独立客户端令牌。
+5. 是否允许先用非敏感代码和小额度进行稳定性测试。
 
-Claude Code 代表了 AI 编程助手的最高水准。无论你是：
+使用第三方网关意味着请求会经过该服务。不要把“使用官方客户端”误解为“流量只经过模型厂商”。
 
-- 🚀 **独立开发者**：提高开发效率，一人当十人用
-- 👥 **创业团队**：快速实现 MVP，降低开发成本
-- 🏢 **企业开发者**：提升代码质量，加速项目交付
-- 📚 **编程学习者**：获得 24/7 的编程导师
+## 常见问题
 
-Claude Code 都将成为你最强大的伙伴。
+### Claude Code 还需要 Node.js 18+ 吗？
 
-### 立即开始
+官方当前推荐原生安装器，macOS、Linux 和 WSL 的首选路径不再要求先安装 Node.js。Homebrew、WinGet 和 Linux 软件包管理器也是官方文档列出的选项。
 
-1. **获取 API Key**：访问 [clauddy.com](https://clauddy.com) 获取稳定的Claude拼车会员服务
-2. **安装 Claude Code 与 Codex CLI**：`npm install -g @anthropic-ai/claude-code`，并使用 Clauddy 提供的共享额度调用 Codex
-3. **开始编程**：一键切换 Claude Code 深度推理与 Codex 极速生成，体验双引擎 AI 助力开发
+### Claude Code 固定使用 Opus 吗？
+
+不固定。当前模型别名、默认值和可用模型会变化，也受账号与 API 服务商影响。运行客户端时应查看实际模型选择，而不是依赖旧教程。
+
+### 上下文窗口到底是 200K 还是 1M？
+
+取决于模型。当前 Fable 5、Opus 4.8 与 Sonnet 5 的官方模型表列出 1M；Haiku 4.5 列出 200K。网关或客户端还可能设置自己的限制。
+
+### 如何检查安装是否正常？
+
+Claude Code 可运行 <code>claude --version</code> 和 <code>claude doctor</code>；Codex 可运行 <code>codex --version</code>。Clauddy 配置向导还会实际请求 <code>/v1/models</code> 检查连通性。
+
+### 一个令牌能否同时用于 Claude Code 和 Codex？
+
+可以选择 Unified 分组共用一把 key；也可以分别创建 Claude 与 OpenAI 专用令牌以降低倍率并方便单独撤销。以控制台当前可选分组为准。
+
+### “Claude 镜像”或“Claude 中转”一定安全吗？
+
+不能只凭名称判断。应重点核对运营主体、数据政策、模型透明度、计费记录、令牌管理和故障处理。敏感项目应遵循所在组织的安全与合规要求。
+
+## 官方资料
+
+- [Anthropic：Claude models overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+- [Anthropic：Claude Code setup](https://code.claude.com/docs/en/setup)
+- [Anthropic：Claude Code model configuration](https://code.claude.com/docs/en/model-config)
+- [OpenAI：Using GPT-5.6](https://developers.openai.com/api/docs/guides/latest-model)
+- [OpenAI：Codex documentation](https://developers.openai.com/codex)
+- [OpenAI：Codex CLI repository](https://github.com/openai/codex)
 
 ---
 
 <p align="center">
-  <strong>选择官方Claude Code拼车会员，避免封号风险</strong><br>
-  避免Claude镜像站和Claude中转站的各种陷阱，使用真正的Claude Opus 4.1<br>
-  <em>Claude拼车 | Claude会员 | Claude Code拼车</em>
+  <strong><a href="https://clauddy.com">打开 Clauddy 控制台</a></strong><br>
+  <sub>Claude Code · Codex · Gemini CLI · Unified AI API gateway</sub>
 </p>
 
 <p align="center">
-  <sub>本Claude Code拼车指南持续更新中 • 最后更新：2025年11月</sub><br>
-  <sub>关键词：Claude镜像 Claude中转 Claude拼车 Claude会员 Claude Code拼车 Claude封号</sub>
+  <sub>Clauddy 是独立第三方服务；本页不代表 Anthropic 或 OpenAI 官方立场。产品名称与商标归各自权利人所有。</sub>
 </p>
