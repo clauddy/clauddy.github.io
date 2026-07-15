@@ -79,7 +79,7 @@ codex
 
 ### 2. 使用 Clauddy 一键配置
 
-仓库根目录的 <code>install.sh</code> 是双语交互式配置向导，当前版本为 <code>0.3.1</code>。默认 API base URL 为 <code>https://api.clauddy.com</code>；控制台与令牌管理仍使用 <code>https://clauddy.com</code>。运行前可以先在 [GitHub 查看并审阅完整脚本源码](https://github.com/clauddy/clauddy.github.io/blob/main/install.sh)，再下载执行：
+仓库根目录的 <code>install.sh</code> 是双语、菜单式交互配置向导，当前版本为 <code>0.4.0</code>。默认 API base URL 为 <code>https://api.clauddy.com</code>；控制台与 API 密钥管理仍使用 <code>https://clauddy.com</code>。运行前可以先在 [GitHub 查看并审阅完整脚本源码](https://github.com/clauddy/clauddy.github.io/blob/main/install.sh)，再下载执行：
 
 ~~~bash
 curl -fsSL https://docs.clauddy.com/install.sh \
@@ -103,11 +103,12 @@ bash /tmp/clauddy-install.sh --lang en
 
 该脚本会：
 
-- 检测 Claude Code、Codex CLI、Gemini CLI、OpenClaw 和 Hermes agent。
-- 根据客户端推荐专用令牌分组，也可使用一个 Unified 令牌。
+- 检测 Claude Code、Codex CLI、Gemini CLI、OpenClaw 和 Hermes agent；缺少客户端时可在确认后调用官方安装方式。
+- 通过菜单选择一个或多个客户端，并可在运行中切换中文或英文界面。
+- 根据客户端推荐专用 API 密钥分组，也可使用一个 Unified 密钥，并可复用本次已验证的密钥。
 - 修改配置前创建带时间戳的备份。
-- 写入对应的 base URL 与 API token 配置。
-- 调用 <code>/v1/models</code> 验证令牌、可用模型数量和接口延迟。
+- 写入对应的 base URL 与 API 密钥配置，并在每个客户端完成后提示启动命令。
+- 调用 <code>/v1/models</code> 验证密钥、可用模型数量和接口延迟。
 - 连续验证失败时，可选择执行一次有界的 AI 诊断；这会消耗少量额度，只返回建议，不自动执行修复。
 
 如需连接自托管或测试网关，可使用 <code>--base-url</code> 覆盖 API 地址；如 API 与控制台不在同一主机，可另外使用 <code>--console-url</code> 指定控制台地址。
