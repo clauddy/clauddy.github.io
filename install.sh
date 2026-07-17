@@ -6,6 +6,8 @@
 #    curl -fsSL https://docs.clauddy.com/install.sh | bash
 #    bash install.sh [--base-url https://api.clauddy.com] \
 #                    [--console-url https://clauddy.com] [--lang zh|en] [--yes]
+#  Windows PowerShell/CMD users: run this Bash script inside WSL, or follow the
+#  Windows manual setup guide at https://docs.clauddy.com/cli/claude-code.
 #
 #  URL 说明 / URLs: API 走 --base-url (默认 https://api.clauddy.com);
 #  控制台/密钥页走 --console-url (默认 https://clauddy.com)。自定义 --base-url
@@ -61,13 +63,26 @@ hr()   { printf '%s\n' "--------------------------------------------------------
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --base-url)      BASE_URL="$2"; shift 2 ;;
+    --base-url)
+      [ "$#" -ge 2 ] && [ -n "$2" ] || { err "--base-url requires a URL"; exit 2; }
+      BASE_URL="$2"; shift 2 ;;
+    --base-url=)     err "--base-url requires a URL"; exit 2 ;;
     --base-url=*)    BASE_URL="${1#*=}"; shift ;;
-    --console-url)   CONSOLE_URL="$2"; shift 2 ;;
+    --console-url)
+      [ "$#" -ge 2 ] && [ -n "$2" ] || { err "--console-url requires a URL"; exit 2; }
+      CONSOLE_URL="$2"; shift 2 ;;
+    --console-url=)  err "--console-url requires a URL"; exit 2 ;;
     --console-url=*) CONSOLE_URL="${1#*=}"; shift ;;
-    --lang)       UI_LANG="$2"; shift 2 ;;
+    --lang)
+      [ "$#" -ge 2 ] && [ -n "$2" ] || { err "--lang requires zh or en"; exit 2; }
+      UI_LANG="$2"; shift 2 ;;
+    --lang=)      err "--lang requires zh or en"; exit 2 ;;
     --lang=*)     UI_LANG="${1#*=}"; shift ;;
     --yes|-y)     ASSUME_YES=1; shift ;;
+    --help|-h)
+      say "Usage: bash install.sh [--base-url URL] [--console-url URL] [--lang zh|en] [--yes]"
+      say "Windows PowerShell/CMD users: run this script inside WSL."
+      exit 0 ;;
     --version)    say "clauddy-setup $VERSION"; exit 0 ;;
     *) err "Unknown argument / 未知参数: $1"; exit 1 ;;
   esac
@@ -87,7 +102,7 @@ case "$UI_LANG" in zh|en) ;; *) err "Unsupported --lang: $UI_LANG (zh|en)"; exit
 load_msgs() {
 if [ "$UI_LANG" = "en" ]; then
   MSG_ERR_NOTTY="Cannot open a terminal for interaction (/dev/tty unreadable). Download and run locally: bash install.sh"
-  MSG_ERR_OS="Unsupported OS: %s (on Windows configure manually per docs, or run this script inside WSL)"
+  MSG_ERR_OS="Unsupported OS: %s. install.sh requires Bash on macOS/Linux; on Windows run it inside WSL or follow the manual setup guide at https://docs.clauddy.com/cli/claude-code."
   MSG_ERR_NEED_CURL="curl is required, please install it first."
   MSG_HDR="Clauddy Setup Wizard v%s  (%s, gateway: %s)"
   MSG_MENU_TITLE="Which client do you want to install/configure? (numbers, space-separated for several, e.g.: 1 2)"
@@ -153,7 +168,7 @@ Validation failure: %s"
   MSG_GRP_DAEMON="${QL}Unified${QR} (always-on agents must NOT use the Claude group)"
 else
   MSG_ERR_NOTTY="无法打开终端进行交互 (/dev/tty 不可读)。请下载后本地运行: bash install.sh"
-  MSG_ERR_OS="暂不支持的系统: %s (Windows 请参考文档手动配置, 或在 WSL 中运行本脚本)"
+  MSG_ERR_OS="暂不支持的系统: %s。install.sh 需要 macOS/Linux 上的 Bash；Windows 请在 WSL 中运行，或参考手动配置教程: https://docs.clauddy.com/cli/claude-code"
   MSG_ERR_NEED_CURL="需要 curl, 请先安装。"
   MSG_HDR="Clauddy 接入向导 v%s  (%s, 网关: %s)"
   MSG_MENU_TITLE="要安装/配置哪个客户端? (输入编号, 多选用空格分隔, 如: 1 2)"

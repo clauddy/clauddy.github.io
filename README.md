@@ -95,6 +95,8 @@ bash /tmp/clauddy-install.sh
 curl -fsSL https://docs.clauddy.com/install.sh | bash
 ~~~
 
+> **Windows PowerShell / CMD:** `install.sh` 是 Bash 脚本，不能直接在 PowerShell 或 CMD 中运行。如果已安装 WSL，请打开 Ubuntu/WSL 终端后再执行上面的命令（脚本只配置 WSL 环境）；也可以在 PowerShell 中调用 `wsl.exe bash -lc "curl -fsSL https://docs.clauddy.com/install.sh | bash"`。如果要在 Windows 原生终端运行客户端，或没有 WSL，请按各客户端的 Windows 手动配置教程操作。
+
 英文界面：
 
 ~~~bash
