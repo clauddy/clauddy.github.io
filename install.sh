@@ -16,20 +16,26 @@
 #  功能 / What it does:
 #    1. 菜单式选择客户端 (Claude Code / Codex / Gemini CLI / OpenClaw /
 #       Hermes agent), 可随时切换中英文界面
-#    2. 未安装的客户端可按各官方安装方式现场安装 (安装前须确认)
+#    2. 未安装的客户端可按各官方安装方式现场安装 (安装前须确认);
+#       npm 类客户端 (Codex/Gemini) 缺少 Node.js 时, 可自动安装官方 LTS
+#       到 ~/.clauddy/node — 仅当前用户、无需 sudo、SHA256 校验;
+#       已有的 Node.js 一律不动 (低于 18 只提示手动升级, 绝不自动升级)
 #    3. 指引创建 API 密钥并校验 (实测 /v1/models, 报告可用模型数与延迟)
 #    4. 自动写入 base_url + api_key 到各客户端配置 (写前备份)
 #    5. 每个客户端配置完成后提示启动命令; 校验失败时可选「AI 诊断」:
 #       用已验证的密钥向网关发一次有界诊断调用, 只输出建议, 不执行任何操作
+#    6. 结束时汇总本次仍未装好的客户端 — 配置已写入, 手动安装后重跑
+#       本脚本即可从中断处继续
 #
-#  除各客户端官方安装源外, 只与 $BASE_URL 通信, 不上传任何数据到其他地址。
-#  写过的文件都有 .bak 备份。
-#  Talks only to $BASE_URL (plus the clients' official install sources);
-#  never uploads anything elsewhere. All modified files are backed up first.
+#  除各客户端官方安装源与 nodejs.org (Node.js 官方二进制) 外, 只与
+#  $BASE_URL 通信, 不上传任何数据到其他地址。写过的文件都有 .bak 备份。
+#  Talks only to $BASE_URL (plus the clients' official install sources and
+#  nodejs.org for official Node.js binaries); never uploads anything
+#  elsewhere. All modified files are backed up first.
 # =============================================================================
 set -u
 
-VERSION="0.4.0"
+VERSION="0.5.0"
 BASE_URL="https://api.clauddy.com"
 CONSOLE_URL=""        # default: https://clauddy.com; follows --base-url when customized
 CONSOLE_KEYS_URL=""   # derived: $CONSOLE_URL/keys
@@ -52,6 +58,8 @@ STAMP="$(date +%Y%m%d%H%M%S)"
 #   Gemini CLI:   brew install gemini-cli       | npm install -g @google/gemini-cli
 #   OpenClaw:     curl -fsSL https://openclaw.ai/install.sh | bash
 #   Hermes agent: curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+#   Node.js:      https://nodejs.org/dist official LTS tarball -> ~/.clauddy/node
+#                 (npm 依赖缺失时的兜底, 用户级安装 / user-local fallback)
 
 # ----------------------------------------------------------------------------
 C_RESET=$'\033[0m'; C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_RED=$'\033[31m'; C_BOLD=$'\033[1m'
@@ -118,10 +126,26 @@ if [ "$UI_LANG" = "en" ]; then
   MSG_INSTALL_ASK="Install it now? Official method: %s  [Y/n] "
   MSG_INSTALLING="Installing %s …"
   MSG_INSTALL_OK="%s installed"
-  MSG_INSTALL_FAIL="%s install failed (exit %s). You can install it manually later — continuing with configuration."
+  MSG_INSTALL_FAIL="%s install FAILED (exit %s) — continuing with configuration."
   MSG_INSTALL_SKIP="Skipping install — configuration will still be written (works as soon as you install it)."
-  MSG_NEED_NODE="Installing %s needs Node.js 18+ (with npm). Install it from https://nodejs.org first — continuing with configuration."
   MSG_PATH_HINT="If the command is not found afterwards, open a new terminal and try again."
+  MSG_RERUN_HINT="Install it manually, then rerun this script — it picks up where it left off."
+  MSG_CFG_ONLY="%s is configured, but the command itself is NOT installed yet — install it manually, then open a new terminal and it will work."
+  MSG_NODE_MISSING="%s needs Node.js 18+ (with npm), which was not found on this system."
+  MSG_NODE_ASK="Install Node.js LTS (%s) to ~/.clauddy/node now? (official nodejs.org binary, current user only, no sudo)  [Y/n] "
+  MSG_NODE_TOO_OLD="Found Node.js %s (older than 18). To avoid breaking your existing environment it will NOT be upgraded automatically — upgrade it yourself, then rerun this script."
+  MSG_NODE_INSTALLING="Downloading Node.js %s (%s) from nodejs.org …"
+  MSG_NODE_OK="Node.js %s ready at %s (new terminals load its PATH via ~/.clauddy/env)"
+  MSG_NODE_FAIL="Node.js auto-install FAILED: %s"
+  MSG_NODE_FAIL_HINT="Install Node.js 18+ manually (https://nodejs.org), then rerun this script — it picks up where it left off."
+  MSG_NODE_R_ARCH="unsupported CPU architecture: %s"
+  MSG_NODE_R_MUSL="musl-based system (e.g. Alpine) — official binaries need glibc"
+  MSG_NODE_R_SHA="sha256sum/shasum not found, cannot verify the download"
+  MSG_NODE_R_DL="download failed (%s)"
+  MSG_NODE_R_SUM="checksum mismatch — the downloaded file was removed"
+  MSG_NODE_R_TAR="extract failed (tar required)"
+  MSG_NODE_R_RUN="the installed node binary does not run on this system (glibc too old?)"
+  MSG_FAILED_SUMMARY="NOT installed in this run: %s — their config is already written. Install them manually, then rerun this script to verify everything works."
   MSG_KEY_FOR="Set up the API key for %s:"
   MSG_KEY_STEP="  Open %s, create an API key (choose group %s), then paste it below."
   MSG_KEY_REUSE="  (a key was already validated in this run — just press Enter to reuse it)"
@@ -184,10 +208,26 @@ else
   MSG_INSTALL_ASK="现在安装吗? 官方安装方式: %s  [Y/n] "
   MSG_INSTALLING="正在安装 %s …"
   MSG_INSTALL_OK="%s 安装完成"
-  MSG_INSTALL_FAIL="%s 安装失败 (退出码 %s)。可稍后手动安装 — 先继续写入配置。"
+  MSG_INSTALL_FAIL="%s 安装失败 (退出码 %s) — 先继续写入配置。"
   MSG_INSTALL_SKIP="跳过安装 — 仍会写入配置 (装好后即可直接使用)。"
-  MSG_NEED_NODE="安装 %s 需要 Node.js 18+ (含 npm)。请先到 https://nodejs.org 安装 — 先继续写入配置。"
   MSG_PATH_HINT="若之后提示 command not found, 请新开一个终端再试。"
+  MSG_RERUN_HINT="请手动安装后重新运行本脚本 — 会从中断处继续。"
+  MSG_CFG_ONLY="%s 的配置已写好, 但其命令尚未安装成功 — 请手动安装, 之后新开终端即可直接使用。"
+  MSG_NODE_MISSING="%s 需要 Node.js 18+ (含 npm), 当前系统未检测到。"
+  MSG_NODE_ASK="现在把 Node.js LTS (%s) 安装到 ~/.clauddy/node 吗? (nodejs.org 官方二进制, 仅当前用户, 无需 sudo)  [Y/n] "
+  MSG_NODE_TOO_OLD="检测到 Node.js %s (低于 18)。为避免影响现有环境, 不会自动升级 — 请自行升级到 18+ 后重新运行本脚本。"
+  MSG_NODE_INSTALLING="正在从 nodejs.org 下载 Node.js %s (%s) …"
+  MSG_NODE_OK="Node.js %s 已就绪: %s (新终端会通过 ~/.clauddy/env 自动加载 PATH)"
+  MSG_NODE_FAIL="Node.js 自动安装失败: %s"
+  MSG_NODE_FAIL_HINT="请手动安装 Node.js 18+ (https://nodejs.org), 然后重新运行本脚本 — 会从中断处继续。"
+  MSG_NODE_R_ARCH="暂不支持的 CPU 架构: %s"
+  MSG_NODE_R_MUSL="musl 系统 (如 Alpine) — 官方二进制需要 glibc"
+  MSG_NODE_R_SHA="未找到 sha256sum/shasum, 无法校验下载文件"
+  MSG_NODE_R_DL="下载失败 (%s)"
+  MSG_NODE_R_SUM="校验和不匹配 — 已删除下载文件"
+  MSG_NODE_R_TAR="解压失败 (需要 tar)"
+  MSG_NODE_R_RUN="安装后的 node 无法在本机运行 (glibc 过旧?)"
+  MSG_FAILED_SUMMARY="本次未完成安装: %s — 配置均已写好。请手动安装后重新运行本脚本, 验证一切可用。"
   MSG_KEY_FOR="为 %s 配置 API 密钥:"
   MSG_KEY_STEP="  打开 %s, 新建 API 密钥 (分组选 %s), 然后粘贴到下面。"
   MSG_KEY_REUSE="  (本次已验证过一把密钥, 直接按回车即可复用)"
@@ -368,14 +408,98 @@ guide_and_read() { # $1=client name  $2=group hint (display)  $3=primary group (
   done
 }
 
+# ---- Node.js 兜底安装 / user-local Node.js fallback -----------------------------
+# npm 类客户端缺 Node 时: 官方 LTS tarball -> ~/.clauddy/node (无 sudo, SHA256 校验)。
+# 已有 Node 一律不动; 低于 18 只提示手动升级, 避免影响用户现有环境。
+NODE_DIR="$HOME/.clauddy/node"
+NODE_LTS_LINE="v24.x"   # 安装的 LTS 版本线 / LTS line to install
+NPM_BIN="npm"           # ensure_node 成功后指向可用的 npm / usable npm after ensure_node
+
+# 命令存在性: PATH 之外还认本脚本装过的位置 (本次运行内 PATH 尚未刷新)
+has_cmd() { command -v "$1" >/dev/null 2>&1 || [ -x "$NODE_DIR/bin/$1" ] || [ -x "$HOME/.local/bin/$1" ]; }
+
+ensure_node() { # $1 = client name (仅用于提示); 成功时设置 NPM_BIN
+  local name="$1" major plat arch file ver sum got tmpd shas
+  if command -v node >/dev/null 2>&1; then
+    major="$(node -v 2>/dev/null | sed 's/^v//' | cut -d. -f1)"
+    if [ -n "$major" ] && [ "$major" -ge 18 ] 2>/dev/null; then
+      if command -v npm >/dev/null 2>&1; then NPM_BIN="npm"; return 0; fi
+      # node 够新但缺 npm -> 走本地兜底安装 / node ok but npm missing: local install
+    else
+      warn "$(printf "$MSG_NODE_TOO_OLD" "$(node -v 2>/dev/null)")"
+      return 1
+    fi
+  fi
+  if [ -x "$NODE_DIR/bin/npm" ] && "$NODE_DIR/bin/node" -v >/dev/null 2>&1; then
+    NPM_BIN="$NODE_DIR/bin/npm"; ENV_NODE=1; write_env_file
+    ok "$(printf "$MSG_NODE_OK" "$("$NODE_DIR/bin/node" -v)" "$NODE_DIR")"
+    return 0
+  fi
+  warn "$(printf "$MSG_NODE_MISSING" "$name")"
+  if [ "$ASSUME_YES" -ne 1 ]; then
+    ask "$(printf "$MSG_NODE_ASK" "$NODE_LTS_LINE")"
+    case "$REPLY" in n|N|no|NO) warn "$MSG_NODE_FAIL_HINT"; return 1 ;; esac
+  fi
+  case "$(uname -m)" in
+    x86_64|amd64)  arch="x64" ;;
+    aarch64|arm64) arch="arm64" ;;
+    *) warn "$(printf "$MSG_NODE_FAIL" "$(printf "$MSG_NODE_R_ARCH" "$(uname -m)")")"; warn "$MSG_NODE_FAIL_HINT"; return 1 ;;
+  esac
+  if [ "$OS_NAME" = "macOS" ]; then plat="darwin"; else plat="linux"; fi
+  if [ "$plat" = "linux" ] && ldd --version 2>&1 | grep -qi musl; then
+    warn "$(printf "$MSG_NODE_FAIL" "$MSG_NODE_R_MUSL")"; warn "$MSG_NODE_FAIL_HINT"; return 1
+  fi
+  if ! command -v sha256sum >/dev/null 2>&1 && ! command -v shasum >/dev/null 2>&1; then
+    warn "$(printf "$MSG_NODE_FAIL" "$MSG_NODE_R_SHA")"; warn "$MSG_NODE_FAIL_HINT"; return 1
+  fi
+  command -v tar >/dev/null 2>&1 || { warn "$(printf "$MSG_NODE_FAIL" "$MSG_NODE_R_TAR")"; warn "$MSG_NODE_FAIL_HINT"; return 1; }
+  shas="$(curl -fsSL --connect-timeout 10 --max-time 60 "https://nodejs.org/dist/latest-$NODE_LTS_LINE/SHASUMS256.txt" 2>/dev/null)"
+  file="$(printf '%s\n' "$shas" | grep -o "node-v[0-9.]*-$plat-$arch\.tar\.gz" | head -1)"
+  sum="$(printf '%s\n' "$shas" | awk -v f="$file" 'NF==2 && $2==f {print $1; exit}')"
+  if [ -z "$file" ] || [ -z "$sum" ]; then
+    warn "$(printf "$MSG_NODE_FAIL" "$(printf "$MSG_NODE_R_DL" "SHASUMS256.txt")")"; warn "$MSG_NODE_FAIL_HINT"; return 1
+  fi
+  ver="${file#node-}"; ver="${ver%%-*}"
+  say "$(printf "$MSG_NODE_INSTALLING" "$ver" "$plat-$arch")"
+  tmpd="$(mktemp -d)" || { warn "$(printf "$MSG_NODE_FAIL" "mktemp")"; warn "$MSG_NODE_FAIL_HINT"; return 1; }
+  if ! curl -fL --progress-bar --connect-timeout 10 --max-time 600 -o "$tmpd/$file" "https://nodejs.org/dist/$ver/$file"; then
+    rm -rf "$tmpd"
+    warn "$(printf "$MSG_NODE_FAIL" "$(printf "$MSG_NODE_R_DL" "$file")")"; warn "$MSG_NODE_FAIL_HINT"; return 1
+  fi
+  if command -v sha256sum >/dev/null 2>&1; then got="$(sha256sum "$tmpd/$file" | cut -d' ' -f1)"
+  else got="$(shasum -a 256 "$tmpd/$file" | cut -d' ' -f1)"; fi
+  if [ "$got" != "$sum" ]; then
+    rm -rf "$tmpd"
+    warn "$(printf "$MSG_NODE_FAIL" "$MSG_NODE_R_SUM")"; warn "$MSG_NODE_FAIL_HINT"; return 1
+  fi
+  rm -rf "$NODE_DIR"; mkdir -p "$NODE_DIR"
+  if ! tar -xzf "$tmpd/$file" -C "$NODE_DIR" --strip-components=1; then
+    rm -rf "$tmpd" "$NODE_DIR"
+    warn "$(printf "$MSG_NODE_FAIL" "$MSG_NODE_R_TAR")"; warn "$MSG_NODE_FAIL_HINT"; return 1
+  fi
+  rm -rf "$tmpd"
+  if ! "$NODE_DIR/bin/node" -v >/dev/null 2>&1; then
+    rm -rf "$NODE_DIR"
+    warn "$(printf "$MSG_NODE_FAIL" "$MSG_NODE_R_RUN")"; warn "$MSG_NODE_FAIL_HINT"; return 1
+  fi
+  NPM_BIN="$NODE_DIR/bin/npm"
+  ENV_NODE=1
+  write_env_file
+  ok "$(printf "$MSG_NODE_OK" "$("$NODE_DIR/bin/node" -v)" "$NODE_DIR")"
+  return 0
+}
+
 # ---- 客户端安装 / client installation ------------------------------------------
 ensure_installed() { # $1=name $2=command $3=install command $4=kind(curl|brew|npm)
   local name="$1" cmd="$2" icmd="$3" kind="$4" rcode
-  command -v "$cmd" >/dev/null 2>&1 && return 0
+  has_cmd "$cmd" && return 0
   warn "$(printf "$MSG_NOT_INSTALLED" "$name")"
-  if [ "$kind" = "npm" ] && ! command -v npm >/dev/null 2>&1; then
-    warn "$(printf "$MSG_NEED_NODE" "$name")"
-    return 1
+  if [ "$kind" = "npm" ]; then
+    ensure_node "$name" || return 1   # 失败原因与手动安装提示已在 ensure_node 内输出
+    if [ "$NPM_BIN" != "npm" ]; then
+      # 本地 Node: npm 及其 shebang 都要能找到 node / local node must be on PATH for npm
+      icmd="PATH=\"$NODE_DIR/bin:\$PATH\" $icmd"
+    fi
   fi
   if [ "$ASSUME_YES" -ne 1 ]; then
     ask "$(printf "$MSG_INSTALL_ASK" "${C_BOLD}${icmd}${C_RESET}")"
@@ -387,15 +511,21 @@ ensure_installed() { # $1=name $2=command $3=install command $4=kind(curl|brew|n
   rcode=$?
   if [ "$rcode" -ne 0 ]; then
     warn "$(printf "$MSG_INSTALL_FAIL" "$name" "$rcode")"
+    warn "$MSG_RERUN_HINT"
     return 1
   fi
   ok "$(printf "$MSG_INSTALL_OK" "$name")"
-  command -v "$cmd" >/dev/null 2>&1 || warn "$MSG_PATH_HINT"
+  has_cmd "$cmd" || warn "$MSG_PATH_HINT"
   return 0
 }
 
 # ---- 写配置 (写前备份) / write configs (backup first) ----------------------------
-backup() { [ -f "$1" ] && cp -p "$1" "$1.bak.$STAMP" && say "$(printf "$MSG_BACKUP" "$1.bak.$STAMP")"; }
+# 每个文件每次运行只备份一次, 保留运行前的原始状态 / one backup per file per run
+backup() {
+  [ -f "$1" ] || return 0
+  [ -f "$1.bak.$STAMP" ] && return 0
+  cp -p "$1" "$1.bak.$STAMP" && say "$(printf "$MSG_BACKUP" "$1.bak.$STAMP")"
+}
 strip_managed_block() { # $1=file  删除旧托管块 / remove old managed blocks
   [ -f "$1" ] || return 0
   awk '/# >>> clauddy setup >>>/{skip=1} skip==0{print} /# <<< clauddy setup <<</{skip=0}' "$1" > "$1.tmp.$$" \
@@ -404,6 +534,8 @@ strip_managed_block() { # $1=file  删除旧托管块 / remove old managed block
 CHANGED=""
 ENV_KEY_CODEX=""   # accumulated across the menu loop; env file is rewritten whole
 ENV_KEY_DAEMON=""
+ENV_NODE=0         # 1 = 使用 ~/.clauddy/node, env 文件需带 PATH / local node in use
+CUR_INSTALLED=0    # 当前客户端本次是否确认已装上 / current client install status
 
 # Claude Code: ~/.claude/settings.json env 块 (JSON 合并, 不破坏已有配置)
 configure_claude() {
@@ -431,13 +563,18 @@ PYEOF
     say "    \"ANTHROPIC_BASE_URL\": \"$BASE_URL\","
     say "    \"ANTHROPIC_AUTH_TOKEN\": \"<your API key>\""
   fi
-  ok "$(printf "$MSG_READY_CLAUDE" "$C_BOLD" "$C_RESET")"
+  if [ "$CUR_INSTALLED" -eq 1 ]; then
+    ok "$(printf "$MSG_READY_CLAUDE" "$C_BOLD" "$C_RESET")"
+  else
+    warn "$(printf "$MSG_CFG_ONLY" "Claude Code")"
+  fi
 }
 
 # Codex CLI: ~/.codex/config.toml 托管块 + key 走环境变量 CLAUDDY_API_KEY
 configure_codex() {
   local key="$1" f="$HOME/.codex/config.toml" model
   model="$(pick_model codex)"
+  [ -z "$model" ] && model="$(pick_model gpt)"   # 分组内无 codex 命名时退而选 gpt 系
   mkdir -p "$HOME/.codex"; backup "$f"; touch "$f"; strip_managed_block "$f"
   # TOML 语义: 顶层键必须出现在任何 [table] 之前 -> 顶层键写头部托管块,
   # provider table 写尾部托管块; 原有顶层 model/model_provider 注释接管, 避免重复键。
@@ -465,7 +602,11 @@ configure_codex() {
   CHANGED="$CHANGED $f"
   ENV_KEY_CODEX="$key"
   write_env_file
-  ok "$(printf "$MSG_READY_CODEX" "$C_BOLD" "$C_RESET")"
+  if [ "$CUR_INSTALLED" -eq 1 ]; then
+    ok "$(printf "$MSG_READY_CODEX" "$C_BOLD" "$C_RESET")"
+  else
+    warn "$(printf "$MSG_CFG_ONLY" "Codex CLI")"
+  fi
 }
 
 # Gemini CLI: ~/.gemini/.env (gemini-cli 启动时自动加载)
@@ -481,7 +622,11 @@ configure_gemini() {
   chmod 600 "$f"
   ok "$(printf "$MSG_OK_GEMINI" "$f")"
   CHANGED="$CHANGED $f"
-  ok "$(printf "$MSG_READY_GEMINI" "$C_BOLD" "$C_RESET")"
+  if [ "$CUR_INSTALLED" -eq 1 ]; then
+    ok "$(printf "$MSG_READY_GEMINI" "$C_BOLD" "$C_RESET")"
+  else
+    warn "$(printf "$MSG_CFG_ONLY" "Gemini CLI")"
+  fi
 }
 
 # 常驻 agent (OpenClaw / Hermes): 全套变量写 ~/.clauddy/env
@@ -489,18 +634,31 @@ configure_daemon() {
   local key="$1" name="$2" cmd="$3"
   ENV_KEY_DAEMON="$key"
   write_env_file
-  ok "$(printf "$MSG_READY_DAEMON" "$name" "$C_BOLD" "$cmd" "$C_RESET")"
+  if [ "$CUR_INSTALLED" -eq 1 ]; then
+    ok "$(printf "$MSG_READY_DAEMON" "$name" "$C_BOLD" "$cmd" "$C_RESET")"
+  else
+    warn "$(printf "$MSG_CFG_ONLY" "$name")"
+  fi
   say "$MSG_READY_DAEMON2"
   say "${C_YELLOW}${MSG_TIP_DAEMON}${C_RESET}"
 }
 
-# 通用环境文件 ~/.clauddy/env — 守护进程 + Codex 的 env_key 从这里加载。
-# 每次整块重写, 保证多轮配置 (先 Codex 后 daemon 等) 不互相覆盖。
+# 通用环境文件 ~/.clauddy/env — 守护进程 + Codex 的 env_key + 本地 Node 的 PATH。
+# 每次整块重写; 重写前先回收上次运行写入的值, 保证多轮/多次运行不互相覆盖。
 write_env_file() {
   local f="$HOME/.clauddy/env" rc
-  mkdir -p "$HOME/.clauddy"; backup "$f"; touch "$f"; strip_managed_block "$f"
+  mkdir -p "$HOME/.clauddy"
+  if [ -f "$f" ]; then
+    [ -z "$ENV_KEY_CODEX" ] && ENV_KEY_CODEX="$(sed -n 's/^export CLAUDDY_API_KEY="\(.*\)"$/\1/p' "$f" | head -1)"
+    [ -z "$ENV_KEY_DAEMON" ] && ENV_KEY_DAEMON="$(sed -n 's/^export ANTHROPIC_AUTH_TOKEN="\(.*\)"$/\1/p' "$f" | head -1)"
+    [ "$ENV_NODE" -eq 0 ] && grep -q 'clauddy/node/bin' "$f" && ENV_NODE=1
+  fi
+  backup "$f"; touch "$f"; strip_managed_block "$f"
   {
     printf '%s\n' '# >>> clauddy setup >>>'
+    if [ "$ENV_NODE" -eq 1 ]; then
+      printf '%s\n' 'case ":$PATH:" in *":$HOME/.clauddy/node/bin:"*) ;; *) export PATH="$PATH:$HOME/.clauddy/node/bin" ;; esac'
+    fi
     if [ -n "$ENV_KEY_CODEX" ]; then
       printf 'export CLAUDDY_API_KEY="%s"\n' "$ENV_KEY_CODEX"
     fi
@@ -564,7 +722,9 @@ setup_client() { # $1 = menu id 1..5
   esac
   say ""
   hr
-  ensure_installed "$name" "$cmd" "$icmd" "$ikind"   # 安装失败/跳过仍继续配置
+  # 安装失败/跳过仍继续写配置 / config is still written when install fails or is skipped
+  CUR_INSTALLED=0
+  if ensure_installed "$name" "$cmd" "$icmd" "$ikind"; then CUR_INSTALLED=1; fi
   if ! guide_and_read "$name" "$group_disp" "$group"; then
     warn "$(printf "$MSG_SKIP_CLIENT" "$name")"
     return 0
@@ -578,7 +738,8 @@ setup_client() { # $1 = menu id 1..5
 }
 
 # ---- 主菜单循环 / main menu loop ------------------------------------------------
-inst_tag() { command -v "$1" >/dev/null 2>&1 && printf '%s' "$MSG_TAG_INSTALLED" || printf '%s' "$MSG_TAG_MISSING"; }
+inst_tag() { has_cmd "$1" && printf '%s' "$MSG_TAG_INSTALLED" || printf '%s' "$MSG_TAG_MISSING"; }
+ATTEMPTED=""   # 本次运行处理过的客户端编号 / client ids handled in this run
 
 say ""
 say "${C_BOLD}$(printf "$MSG_HDR" "$VERSION" "$OS_NAME" "$BASE_URL")${C_RESET}"
@@ -613,6 +774,7 @@ while :; do
   fi
   for id in $SEL_CLIENTS; do
     setup_client "$id"
+    ATTEMPTED="$ATTEMPTED $id"
     FIRST_ROUND=0
   done
   [ "$EXIT_REQ" -eq 1 ] && break
@@ -624,6 +786,22 @@ done
 # ---- 退出总结 / exit summary ----------------------------------------------------
 say ""
 hr
+# 逐个复核本次处理过的客户端, 未装上的明确列出 / recheck every client handled this run
+MISSING=""
+for id in $(printf '%s\n' $ATTEMPTED | awk '!seen[$0]++'); do
+  case "$id" in
+    1) SUM_NAME="Claude Code";  SUM_CMD="claude" ;;
+    2) SUM_NAME="Codex CLI";    SUM_CMD="codex" ;;
+    3) SUM_NAME="Gemini CLI";   SUM_CMD="gemini" ;;
+    4) SUM_NAME="OpenClaw";     SUM_CMD="openclaw" ;;
+    5) SUM_NAME="Hermes agent"; SUM_CMD="hermes" ;;
+    *) continue ;;
+  esac
+  has_cmd "$SUM_CMD" || MISSING="${MISSING:+$MISSING, }$SUM_NAME"
+done
+if [ -n "$MISSING" ]; then
+  warn "$(printf "$MSG_FAILED_SUMMARY" "${C_BOLD}${MISSING}${C_RESET}")"
+fi
 if [ -n "$CHANGED" ]; then
   CHANGED_UNIQ=" $(printf '%s\n' $CHANGED | awk '!seen[$0]++' | tr '\n' ' ')"
   say "$(printf "$MSG_CHANGED" "${CHANGED_UNIQ% }" "$STAMP")"

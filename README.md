@@ -1,6 +1,6 @@
 # 2026 Claude Code 与 Codex 国内使用指南｜Clauddy 一键配置、模型更新与安全说明
 
-*最后核对：2026 年 7 月 13 日*
+*最后核对：2026 年 7 月 18 日*
 
 <p align="center">
   <img src="https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/6826a6227b1fbd47034d1936_claude-code.webp" alt="Claude Code、Codex 与 Clauddy 配置指南" width="600">
@@ -79,7 +79,7 @@ codex
 
 ### 2. 使用 Clauddy 一键配置
 
-仓库根目录的 <code>install.sh</code> 是双语、菜单式交互配置向导，当前版本为 <code>0.4.0</code>。默认 API base URL 为 <code>https://api.clauddy.com</code>；控制台与 API 密钥管理仍使用 <code>https://clauddy.com</code>。运行前可以先在 [GitHub 查看并审阅完整脚本源码](https://github.com/clauddy/clauddy.github.io/blob/main/install.sh)，再下载执行：
+仓库根目录的 <code>install.sh</code> 是双语、菜单式交互配置向导，当前版本为 <code>0.5.0</code>。默认 API base URL 为 <code>https://api.clauddy.com</code>；控制台与 API 密钥管理仍使用 <code>https://clauddy.com</code>。运行前可以先在 [GitHub 查看并审阅完整脚本源码](https://github.com/clauddy/clauddy.github.io/blob/main/install.sh)，再下载执行：
 
 ~~~bash
 curl -fsSL https://docs.clauddy.com/install.sh \
@@ -106,12 +106,14 @@ bash /tmp/clauddy-install.sh --lang en
 该脚本会：
 
 - 检测 Claude Code、Codex CLI、Gemini CLI、OpenClaw 和 Hermes agent；缺少客户端时可在确认后调用官方安装方式。
+- 通过 npm 安装 Codex CLI / Gemini CLI 而系统缺少 Node.js 时，可在确认后把官方 Node.js LTS 从 nodejs.org 安装到 <code>~/.clauddy/node</code>（仅当前用户、无需 sudo、SHA256 校验）。已有的 Node.js 一律不改动：版本低于 18 时只提示手动升级。
 - 通过菜单选择一个或多个客户端，并可在运行中切换中文或英文界面。
 - 根据客户端推荐专用 API 密钥分组，也可使用一个 Unified 密钥，并可复用本次已验证的密钥。
 - 修改配置前创建带时间戳的备份。
 - 写入对应的 base URL 与 API 密钥配置，并在每个客户端完成后提示启动命令。
 - 调用 <code>/v1/models</code> 验证密钥、可用模型数量和接口延迟。
 - 连续验证失败时，可选择执行一次有界的 AI 诊断；这会消耗少量额度，只返回建议，不自动执行修复。
+- 任一安装步骤失败或被跳过时会立即警告，并在结束时汇总本次仍未装好的客户端；配置此时已写入，手动安装后重新运行脚本即可从中断处继续并验证。
 
 如需连接自托管或测试网关，可使用 <code>--base-url</code> 覆盖 API 地址；如 API 与控制台不在同一主机，可另外使用 <code>--console-url</code> 指定控制台地址。
 
@@ -139,6 +141,7 @@ bash /tmp/clauddy-install.sh --lang en
 | Claude Code | <code>~/.claude/settings.json</code> |
 | Codex | <code>~/.codex/config.toml</code> 与 <code>~/.clauddy/env</code> |
 | Gemini CLI | <code>~/.gemini/.env</code> |
+| Node.js（可选兜底） | <code>~/.clauddy/node</code>（官方 LTS 二进制，仅当前用户） |
 | Shell 环境 | <code>~/.zshrc</code>、<code>~/.bashrc</code> 或 <code>~/.profile</code> |
 
 已有文件会先备份为 <code>.bak.&lt;时间戳&gt;</code>。令牌属于敏感凭据，不要提交到 Git、粘贴到 Issue、截图或发送给无关人员。
@@ -173,6 +176,8 @@ Claude Code、Codex 等是官方客户端；Clauddy 是独立的第三方统一 
 ### Claude Code 还需要 Node.js 18+ 吗？
 
 官方当前推荐原生安装器，macOS、Linux 和 WSL 的首选路径不再要求先安装 Node.js。Homebrew、WinGet 和 Linux 软件包管理器也是官方文档列出的选项。
+
+通过 npm 安装 Codex CLI 或 Gemini CLI 时仍需要 Node.js 18+。从向导 0.5.0 起，系统缺少 Node.js 时可在确认后自动把官方 LTS 安装到 <code>~/.clauddy/node</code>（仅当前用户、无需 sudo、SHA256 校验）；自动安装失败或被跳过时，脚本会明确提示手动安装并重新运行。
 
 ### Claude Code 固定使用 Opus 吗？
 
