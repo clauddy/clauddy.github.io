@@ -35,7 +35,7 @@
 # =============================================================================
 set -u
 
-VERSION="0.5.0"
+VERSION="0.5.1"
 BASE_URL="https://api.clauddy.com"
 CONSOLE_URL=""        # default: https://clauddy.com; follows --base-url when customized
 CONSOLE_KEYS_URL=""   # derived: $CONSOLE_URL/keys
@@ -43,9 +43,9 @@ ASSUME_YES=0
 UI_LANG="zh"          # 默认中文 / Chinese by default; --lang en or menu item 6
 STAMP="$(date +%Y%m%d%H%M%S)"
 
-# ---- 分组约定 / group taxonomy (synced with production UserUsableGroups, 2026-07-12)
-#   Claude    1.4x  Claude Max 订阅转发, 仅 Claude Code 客户端 / CC clients only
-#   Claude3p  1.8x  Claude Max, 不限制客户端 / any client
+# ---- 分组约定 / group taxonomy (synced with production UserUsableGroups, 2026-07-18)
+#   Claude    1.0x  Claude Max 订阅转发, 仅 Claude Code 客户端 / CC clients only
+#   Claude3p  1.2x  Claude Max, 不限制客户端 / any client
 #   ClaudeAPI 5.0x  Claude 官方 Key 转发, 不限制客户端 / any client
 #   OpenAI    0.5x  Codex Pro 专用 / Codex only
 #   Gemini    1.8x  Gemini Ultra 专用 / Gemini only
@@ -186,7 +186,7 @@ Validation failure: %s"
   MSG_FOOTER="Console: %s  ·  API keys: %s"
   MSG_HINT_CCONLY="If you ever hit \"This group only allows Claude Code clients\": create a Unified-group API key for that client instead."
   QL='"'; QR='"'
-  MSG_GRP_CLAUDE="${QL}Claude${QR} (1.4x, cheapest) or ${QL}Unified${QR} (1.8x, works everywhere)"
+  MSG_GRP_CLAUDE="${QL}Claude${QR} (1.0x, cheapest) or ${QL}Unified${QR} (1.8x, works everywhere)"
   MSG_GRP_CODEX="${QL}OpenAI${QR} (0.5x, cheapest) or ${QL}Unified${QR} (1.8x, works everywhere)"
   MSG_GRP_GEMINI="${QL}Gemini${QR} or ${QL}Unified${QR} (both 1.8x)"
   MSG_GRP_DAEMON="${QL}Unified${QR} (always-on agents must NOT use the Claude group)"
@@ -268,7 +268,7 @@ else
   MSG_FOOTER="控制台: %s  ·  API 密钥管理: %s"
   MSG_HINT_CCONLY="若遇到「该分组仅允许 Claude Code 客户端」报错: 为该客户端另建一个 Unified 分组的 API 密钥即可。"
   QL="「"; QR="」"
-  MSG_GRP_CLAUDE="${QL}Claude${QR} (1.4x 最省) 或 ${QL}Unified${QR} (1.8x 通用)"
+  MSG_GRP_CLAUDE="${QL}Claude${QR} (1.0x 最省) 或 ${QL}Unified${QR} (1.8x 通用)"
   MSG_GRP_CODEX="${QL}OpenAI${QR} (0.5x 最省) 或 ${QL}Unified${QR} (1.8x 通用)"
   MSG_GRP_GEMINI="${QL}Gemini${QR} 或 ${QL}Unified${QR} (均 1.8x)"
   MSG_GRP_DAEMON="${QL}Unified${QR} (常驻 agent 请勿用 Claude 组)"
@@ -348,7 +348,7 @@ reply_lang = "Simplified Chinese" if lang == "zh" else "English"
 sysmsg = (
     "You are the onboarding diagnosis assistant for the Clauddy gateway (new-api based). "
     "A user's API key failed validation while configuring an AI client. "
-    "Gateway key groups: Claude (Claude Code clients ONLY, 1.4x); Claude3p (any client, 1.8x); "
+    "Gateway key groups: Claude (Claude Code clients ONLY, 1.0x); Claude3p (any client, 1.2x); "
     "ClaudeAPI (any client, 5x); OpenAI (Codex only, 0.5x); Gemini (1.8x); "
     "Unified (any client, all models, 1.8x — the convenient single-key option). "
     "Common failures: HTTP 401 = invalid or incompletely pasted key; group errors = key group does not "

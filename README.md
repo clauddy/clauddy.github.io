@@ -79,7 +79,7 @@ codex
 
 ### 2. 使用 Clauddy 一键配置
 
-仓库根目录的 <code>install.sh</code> 是双语、菜单式交互配置向导，当前版本为 <code>0.5.0</code>。默认 API base URL 为 <code>https://api.clauddy.com</code>；控制台与 API 密钥管理仍使用 <code>https://clauddy.com</code>。运行前可以先在 [GitHub 查看并审阅完整脚本源码](https://github.com/clauddy/clauddy.github.io/blob/main/install.sh)，再下载执行：
+仓库根目录的 <code>install.sh</code> 是双语、菜单式交互配置向导，当前版本为 <code>0.5.1</code>。默认 API base URL 为 <code>https://api.clauddy.com</code>；控制台与 API 密钥管理仍使用 <code>https://clauddy.com</code>。运行前可以先在 [GitHub 查看并审阅完整脚本源码](https://github.com/clauddy/clauddy.github.io/blob/main/install.sh)，再下载执行：
 
 ~~~bash
 curl -fsSL https://docs.clauddy.com/install.sh \
@@ -119,14 +119,16 @@ bash /tmp/clauddy-install.sh --lang en
 
 ## Clauddy 当前分组说明
 
-以下倍率来自安装脚本中 2026 年 7 月 12 日同步的生产分组信息。控制台实时显示始终具有更高优先级。
+以下倍率来自安装脚本中 2026 年 7 月 18 日同步的生产分组信息。控制台实时显示始终具有更高优先级。
+
+2026 年 7 月 18 日起，Claude 分组下调至 1.0x，Claude3p 下调至 1.2x；Clauddy 称这是当前市面同类 Claude 转发分组中的最低倍率。
 
 | 分组 | 适用客户端 | 脚本记录倍率 |
 | --- | --- | ---: |
-| Claude | Claude Code 专用 | 1.4x |
+| Claude | Claude Code 专用 | 1.0x |
 | OpenAI | Codex 专用 | 0.5x |
 | Gemini | Gemini CLI 专用 | 1.8x |
-| Claude3p | 不限制 Claude 客户端类型 | 1.8x |
+| Claude3p | 不限制 Claude 客户端类型 | 1.2x |
 | ClaudeAPI | Claude 官方 Key 转发 | 5.0x |
 | Unified | Claude、Codex、Gemini 及常驻 agent | 1.8x |
 
